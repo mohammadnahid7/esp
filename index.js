@@ -1,28 +1,18 @@
-const express = require("express");
-const app = express();
-app.use(express.json());
+// api/motor.js - Ultra simple Vercel serverless function
 
-let ledState = "off"; // default state
+let motorOn = false;
 
-// --- GET endpoint: ESP fetches this ---
-app.get("/status", (req, res) => {
-  res.json({ state: ledState });
-});
-
-// --- POST endpoint: mobile app updates state ---
-app.post("/status", (req, res) => {
-  const { state } = req.body;
-  if (state === "on" || state === "off") {
-    ledState = state;
-    console.log("LED State updated to:", ledState);
-    res.json({ success: true, state: ledState });
-  } else {
-    res.status(400).json({ success: false, error: "Invalid state" });
+export default function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // Handle POST - Update motor status
+  if (req.method === 'POST' && req.body && req.body.s !== undefined) {
+    motorOn = req.body.s; // s = status (true/false or 1/0)
   }
-});
-
-// Start server
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  
+  // Always return status
+  res.json({ s: motorOn });
+}
